@@ -11,17 +11,17 @@ class DynamoDBOAuthUserDBClient(OAuthUserDBClient):
         client_secret: str,
         authorization_url: str,
         token_url: str,
-        redirect_url: str,
         scope: List[str],
         dynamodb_table: Any,
+        **kwargs
     ):
         super().__init__(
             client_id=client_id,
             client_secret=client_secret,
             authorization_url=authorization_url,
             token_url=token_url,
-            redirect_url=redirect_url,
             scope=scope,
+            **kwargs
         )
 
         self.table = dynamodb_table

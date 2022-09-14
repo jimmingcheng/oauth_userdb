@@ -5,7 +5,7 @@ with open("README.md", "r") as fh:
 
 setup(
     name='oauth_userdb',
-    version='1.0.0',
+    version='1.0.1',
     description='OAuth User DB',
     long_description=long_description,
     long_description_content_type="text/markdown",

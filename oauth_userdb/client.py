@@ -24,13 +24,13 @@ class OAuthUserDBClient(WebApplicationClient, metaclass=ABCMeta):
         client_secret: str,
         authorization_url: str,
         token_url: str,
-        redirect_url: str,
         scope: List[str],
+        **kwargs
     ):
         super().__init__(
             client_id=client_id,
             scope=scope,
-            redirect_url=redirect_url,
+            **kwargs
         )
         self.client_secret = client_secret
         self.authorization_url = authorization_url
@@ -41,13 +41,12 @@ class OAuthUserDBClient(WebApplicationClient, metaclass=ABCMeta):
 
         token_data = self.parse_request_body_response(resp.text)
 
-        print(token_data)
         return Credentials(
             access_token=token_data['access_token'],
             expires_at=int(time.time() + token_data['expires_at']),
             id_token=token_data.get('id_token'),
             refresh_token=token_data.get('refresh_token'),
-            scope=token_data['scope'],
+            scope=token_data.get('scope'),
         )
 
     def _fetch_refreshed_credentials_from_provider(self) -> Credentials:
