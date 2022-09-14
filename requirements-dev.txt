@@ -1,0 +1,11 @@
+cachetools
+flake8
+jwt
+mock
+mypy
+oauthlib
+pytest
+requests
+requests-mock
+setuptools
+twine
