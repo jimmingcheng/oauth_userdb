@@ -1,6 +1,6 @@
 cachetools
 flake8
-jwt
+PyJWT
 mock
 mypy
 oauthlib
@@ -9,3 +9,5 @@ requests
 requests-mock
 setuptools
 twine
+types-oauthlib
+types-requests

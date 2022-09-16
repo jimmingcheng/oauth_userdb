@@ -5,7 +5,7 @@ with open("README.md", "r") as fh:
 
 setup(
     name='oauth_userdb',
-    version='1.0.1',
+    version='1.0.2',
     description='OAuth User DB',
     long_description=long_description,
     long_description_content_type="text/markdown",
@@ -14,7 +14,7 @@ setup(
     author_email='jimming@gmail.com',
     packages=['oauth_userdb'],
     install_requires=[
-        'jwt',
+        'PyJWT',
         'oauthlib',
         'requests',
     ],

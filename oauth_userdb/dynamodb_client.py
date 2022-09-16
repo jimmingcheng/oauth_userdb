@@ -39,8 +39,12 @@ class DynamoDBOAuthUserDBClient(OAuthUserDBClient):
         )
 
     def save_credentials(self, user_id: str, creds: Credentials) -> None:
-        creds_dict = dict(
-            user_id=user_id,
-            **creds._asdict()
-        )
+        creds_dict = {
+            'user_id': user_id,
+            'access_token': creds.access_token,
+            'expires_at': int(creds.expires_at),
+            'id_token': creds.id_token,
+            'refresh_token': creds.refresh_token,
+            'scope': creds.scope,
+        }
         self.table.put_item(Item=creds_dict)
