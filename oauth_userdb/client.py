@@ -88,12 +88,21 @@ class OAuthUserDBClient(WebApplicationClient, metaclass=ABCMeta):
 
     def get_credentials(self, user_id: str) -> Credentials:
         creds = self.get_saved_credentials(user_id)
-        if int(time.time()) > creds.expires_at:
-            creds = self._fetch_refreshed_credentials_from_provider(
+        if int(time.time()) < creds.expires_at:
+            return creds
+        else:
+            new_creds = self._fetch_refreshed_credentials_from_provider(
                 creds.refresh_token
             )
-            self.save_credentials(user_id, creds)
-        return creds
+            updated_creds = Credentials(
+                access_token=new_creds.access_token,
+                expires_at=new_creds.expires_at,
+                id_token=new_creds.id_token or creds.id_token,
+                refresh_token=new_creds.refresh_token or creds.refresh_token,
+                scope=new_creds.scope or creds.scope,
+            )
+            self.save_credentials(user_id, updated_creds)
+            return updated_creds
 
     def save_user_and_credentials(
         self,
