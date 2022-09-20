@@ -1,6 +1,8 @@
+import mock
 import pytest
 import requests_mock
 import time
+from urllib.parse import parse_qs
 
 from oauth_userdb.client import Credentials
 from oauth_userdb.client import OAuthUserDBClient
@@ -54,3 +56,24 @@ def test_save_user_and_credentials_retains_prior_refresh_token(
         creds = mock_client.get_credentials('fake_user_id')
 
     assert creds.refresh_token == ClientWithExpiredCreds.refresh_token
+
+
+def test_token_request_has_expected_params(
+    mock_client: OAuthUserDBClient,
+) -> None:
+    with mock.patch('oauth_userdb.client.requests.post') as mock_post:
+        mock_post.return_value = mock.Mock(
+            text=f'access_token=new_access_token&expires_at={int(time.time()) + 3600}'
+        )
+        mock_client.get_credentials('fake_user_id')
+        mock_post.assert_called_once_with(
+            TOKEN_URL,
+            headers={'Content-Type': 'application/x-www-form-urlencoded'},
+            data=mock.ANY,
+        )
+        post_data = mock_post.call_args[1]['data']
+        assert 'grant_type=refresh_token' in post_data
+        assert f'client_id={CLIENT_ID}' in post_data
+        assert f'client_secret={CLIENT_SECRET}' in post_data
+        assert f'scope={" ".join(SCOPE)}' in post_data
+        assert f'refresh_token={ClientWithExpiredCreds.refresh_token}' in post_data

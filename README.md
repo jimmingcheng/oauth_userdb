@@ -4,6 +4,10 @@ OAuth User Database
 
 ## Versions
 
+### 1.0.4
+
+- include client_id/client_secret in refresh request
+
 ### 1.0.3
 
 - avoid writing null refresh_token if server does not include refresh_token in refresh request

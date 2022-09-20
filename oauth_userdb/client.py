@@ -61,7 +61,9 @@ class OAuthUserDBClient(WebApplicationClient, metaclass=ABCMeta):
     ) -> Credentials:
         url, headers, body = self.prepare_refresh_token_request(
             self.token_url,
-            refresh_token
+            refresh_token,
+            client_id=self.client_id,
+            client_secret=self.client_secret,
         )
         return self._fetch_credentials_from_provider(url, headers, body)
 
