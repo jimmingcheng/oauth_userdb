@@ -1,8 +1,7 @@
-import mock
+from unittest import mock
 import pytest
 import requests_mock
 import time
-from urllib.parse import parse_qs
 
 from oauth_userdb.client import Credentials
 from oauth_userdb.client import OAuthUserDBClient

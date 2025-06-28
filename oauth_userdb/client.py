@@ -1,7 +1,4 @@
-from typing import List
-from typing import Optional
 from typing import NamedTuple
-from typing import Tuple
 
 import jwt
 import requests
@@ -14,19 +11,25 @@ from oauthlib.oauth2 import WebApplicationClient
 class Credentials(NamedTuple):
     access_token: str
     expires_at: int
-    id_token: Optional[str]
-    refresh_token: Optional[str]
-    scope: List[str]
+    id_token: str | None
+    refresh_token: str | None
+    scope: list[str]
 
 
 class OAuthUserDBClient(WebApplicationClient, metaclass=ABCMeta):
+    client_secret: str
+    authorization_url: str
+    token_url: str
+    redirect_url: str | None
+
     def __init__(
         self,
         client_id: str,
         client_secret: str,
         authorization_url: str,
         token_url: str,
-        scope: List[str],
+        scope: list[str],
+        redirect_url: str | None = None,
         **kwargs
     ):
         super().__init__(
@@ -37,6 +40,7 @@ class OAuthUserDBClient(WebApplicationClient, metaclass=ABCMeta):
         self.client_secret = client_secret
         self.authorization_url = authorization_url
         self.token_url = token_url
+        self.redirect_url = redirect_url
 
     def _fetch_credentials_from_provider(
         self, url: str,
@@ -57,7 +61,7 @@ class OAuthUserDBClient(WebApplicationClient, metaclass=ABCMeta):
 
     def _fetch_refreshed_credentials_from_provider(
         self,
-        refresh_token: Optional[str]
+        refresh_token: str | None,
     ) -> Credentials:
         url, headers, body = self.prepare_refresh_token_request(
             self.token_url,
@@ -67,13 +71,9 @@ class OAuthUserDBClient(WebApplicationClient, metaclass=ABCMeta):
         )
         return self._fetch_credentials_from_provider(url, headers, body)
 
-    def get_authorization_url(
-        self,
-        url_path: Optional[str] = None,
-        **kwargs
-    ) -> str:
+    def get_authorization_url(self, **kwargs) -> str:
         url, _, _ = self.prepare_authorization_request(
-            url_path if url_path else self.authorization_url,
+            authorization_url=self.authorization_url,
             **kwargs
         )
         return url
@@ -109,7 +109,7 @@ class OAuthUserDBClient(WebApplicationClient, metaclass=ABCMeta):
     def save_user_and_credentials(
         self,
         code: str,
-        user_id: Optional[str] = None,
+        user_id: str | None = None,
         **kwargs
     ) -> str:
         creds = self.exchange_code_for_tokens(code, **kwargs)
@@ -143,25 +143,29 @@ class OAuthUserDBClient(WebApplicationClient, metaclass=ABCMeta):
         state=None,
         body='',
         **kwargs
-    ) -> Tuple[str, dict, str]:
+    ) -> tuple[str, dict, str]:
         # Override this if the provider has a non-standard request format
+
+        if not redirect_url:
+            redirect_url = self.redirect_url
+
         return super().prepare_token_request(
-            token_url,
-            authorization_response,
-            redirect_url,
-            state,
-            body,
+            token_url=token_url,
+            autthorization_response=authorization_response,
+            redirect_url=redirect_url,
+            state=state,
+            body=body,
             **kwargs
         )
 
     def prepare_refresh_token_request(
         self,
         token_url: str,
-        refresh_token: Optional[str] = None,
+        refresh_token: str | None = None,
         body: str = '',
-        scope: Optional[List[str]] = None,
+        scope: list[str] | None = None,
         **kwargs
-    ) -> Tuple[str, dict, str]:
+    ) -> tuple[str, dict, str]:
         # Override this if the provider has a non-standard request format
         return super().prepare_refresh_token_request(
             token_url,
